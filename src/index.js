@@ -19,24 +19,27 @@ const elements = (function () {
   
   const tasksSection = content.querySelector('.tasks');
   const projectsSection = content.querySelector('.projects-list')
+
+  // limit the date input to today or greater
+  const limitDateInput = content.querySelector('#task-due').setAttribute('min', todaysDate);
  
 
   let projectsAndTasks = {
     inbox: [
-      {
-        title: 'title 1',
-        priority: '1',
-        due: '2020-10-15',
-        created: '2020-10-14',
-        completed: 'false'
-      },
-      {
-        title: 'title 2',
-        priority: '2',
-        due: '2020-10-16',
-        created: '2020-10-14',
-        completed: 'false'
-      }
+      // {
+      //   title: 'title 1',
+      //   priority: '1',
+      //   due: '2020-10-15',
+      //   created: '2020-10-14',
+      //   completed: 'false'
+      // },
+      // {
+      //   title: 'title 2',
+      //   priority: '2',
+      //   due: '2020-10-16',
+      //   created: '2020-10-14',
+      //   completed: 'false'
+      // }
     ],
     Project1:[]
   };
@@ -105,12 +108,16 @@ class UI {
     console.log('new task sumbission');
     func.saveTaskToProject(func.newTaskFromForm());
     this.closeTaskModal();
-    this.displayTasks('inbox');
+    this.displayTasks('inbox'); // needs to be able to display tasks based on the currently selected one
   }
   
   static submitNewProject() {
     console.log('new project sumbission');
-
+    // console.log(elements.projectsAndTasks);
+    func.saveProjectFromForm();
+    // console.log(elements.projectsAndTasks);
+    this.closeProjectModal();
+    this.displayProjects();
   }  
 
   static displayProjects() {
@@ -131,11 +138,11 @@ class UI {
       if (elements.projectsAndTasks[project][0] == undefined) { return };
 
       let priorityColor;
-      if (task.priority == 1) {priorityColor = 'danger'}
-      if (task.priority == 2) {priorityColor = 'warning'}
-      if (task.priority == 3) { priorityColor = 'success'}
+      if (task.priority == 1) { priorityColor = 'danger' };
+      if (task.priority == 2) { priorityColor = 'warning' };
+      if (task.priority == 3) { priorityColor = 'success' };
       
-      elements.tasksSection.innerHTML += this.createTaskElement(task.title, task.created, task.due, priorityColor, task.priority);
+      elements.tasksSection.innerHTML += this.createTaskElement(task.title, task.created, task.due, priorityColor, task.priority, task.id);
 
     })
   
@@ -160,13 +167,14 @@ class UI {
     addNewButton.textContent = '+';
     addNewButton.addEventListener('click', UI.openTaskModal);
     
-
     elements.tasksSection.appendChild(addNewButton);
+
+    console.log(elements.projectsAndTasks);
   }
 
   // creates task HTML element and returns it
-  static createTaskElement(title, created, due, priorityBtn, priority) {
-    let currentTask = `<div class="task">
+  static createTaskElement(title, created, due, priorityBtn, priority, id) {
+    let currentTask = `<div class="task" data-id='${id}'>
       <input type="checkbox" name="" class="task-checkbox">
       <div class="task-title"> ${title}</div>
       <div class="date-added"> ${created}</div>
@@ -211,10 +219,11 @@ class func {
   }
   
   static newTaskFromForm() {
+    let taskDue = (elements.taskModalForm['task-due'].value == "") ? todaysDate : elements.taskModalForm['task-due'].value;
     const newTask = Task(
       elements.taskModalForm['task-title'].value,
       elements.taskModalForm['task-priority'].value,
-      elements.taskModalForm['task-due'].value,
+      taskDue,
       todaysDate);
     return newTask;
   }
@@ -225,16 +234,19 @@ class func {
   }
 
   static saveProjectFromForm() { // needs to be able to pop up something if the project already exists
-    let newProject = elements.projectModalForm['project-title']
+    let newProject = elements.projectModalForm['project-title'].value;
+    console.log(newProject);
     let projectExists = false;
 
     Object.keys(elements.projectsAndTasks).forEach(e => {
-      if (e == newProject) {projectExists == true}
+      if (e == newProject) {projectExists = true}
     })
 
     if (!projectExists) {
-      elements.projectsAndTasks[newProject];
+      elements.projectsAndTasks[newProject] = [];
+      console.log('new project added');
     }
+    console.log(elements.projectsAndTasks);
   }
 
   static deleteFromProAndTasks() {
@@ -280,18 +292,23 @@ const eventListeners = (function () {
 
 })();
 
-const Task = (taskTitle, taskPriority, taskDue = 0, taskCreated = todaysDate, taskCompleted = false) => {
+let i = 0;
+const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCreated = todaysDate, taskCompleted = false) => {
   let title = taskTitle;
   let priority = taskPriority;
   let due = taskDue;
   let created = taskCreated;
   let completed = taskCompleted;
+  let id = i;
+  i++;
+  
   return {
     title,
     priority,
     due,
     created,
-    completed
+    completed,
+    id
   };
 };
 
