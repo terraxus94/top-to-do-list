@@ -101,15 +101,16 @@
 
 .date-due {
   margin-left: auto;
+  margin-right: 35px;
 }
 
-.task-checkbox,
-.date-due {
+.task-checkbox {
   margin-right: 10px;
 }
 
 .priority {
   padding: 4px 10px;
+  margin-right: 23px;
   border-radius: 50%;
 }
 
@@ -171,8 +172,8 @@
 }
 
 .tasks-priority {
-  margin-right: 50px;
-  margin-left: 18px;
+  margin-right: 75px;
+  margin-left: 38px;
 }
 
 .tasks-added,
@@ -192,4 +193,9 @@
 
 .project .bi-trash {
   margin-left: 20px;
+}
+
+.completed {
+  color: #828282;
+  text-decoration: line-through;
 }

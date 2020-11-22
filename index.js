@@ -213,8 +213,8 @@ class UI {
     // in order to avoid dealing with an error when clicked between the lines of the svg
     if (taskID) {
       func.deleteTaskFromProAndTasks(taskID)
-      func.generateStateObject()
       UI.displayTasks();
+      func.generateStateObject();
     }
   }
 
@@ -385,15 +385,32 @@ const eventListeners = (function () {
   });
 })();
 
+elements.projectsAndTasks = func.loadFromLocStorage();
+func.generateStateObject();
+UI.displayTasks();
+UI.displayProjects();
+UI.highlightProject();
+
 let i = 0;
+function checkTaskIndex() {
+  Object.keys(elements.projectsAndTasks).forEach(project => {
+    elements.projectsAndTasks[project].forEach(task => {
+      if (task.id > i) {
+        i = task.id;
+      }
+    })
+  })
+};
+checkTaskIndex();
+
 const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCompleted = false) => {
   let title = taskTitle;
   let priority = taskPriority;
   let due = taskDue;
   let completed = taskCompleted;
-  let id = i;
-  i++;
-  
+  let id = ++i;
+  console.log(id);
+    
   return {
     title,
     priority,
@@ -402,9 +419,4 @@ const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCompleted = fal
     id
   };
 };
-
-elements.projectsAndTasks = func.loadFromLocStorage();
-func.generateStateObject();
-UI.displayTasks();
-UI.displayProjects();
-UI.highlightProject();
+// toggle completed
