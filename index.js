@@ -37,9 +37,7 @@ const elements = (function () {
       d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
       </svg>`
 
-  let projectsAndTasks = {
-    Inbox: []
-  };
+  let projectsAndTasks;
 
   return {
     content,
@@ -115,6 +113,7 @@ class UI {
         func.saveTaskToProject(project, func.newTaskFromForm());
       }
     })
+    func.saveToLocStorage();
     this.closeTaskModal();
     this.displayTasks(); 
   }
@@ -211,10 +210,10 @@ class UI {
   }
 
   static deleteTask(el) {
-    const taskTitle = el.parentElement.querySelector('.task-title')
+    const taskID = el.parentElement.dataset.id;
     // in order to avoid dealing with an error when clicked between the lines of the svg
-    if (taskTitle) {
-      func.deleteTaskFromProAndTasks(taskTitle.textContent)
+    if (taskID) {
+      func.deleteTaskFromProAndTasks(taskID)
       func.generateStateObject()
       UI.displayTasks();
     }
@@ -247,10 +246,6 @@ class UI {
   }
 }
 
-// calling the display task func to initiate 
-UI.displayTasks();
-UI.displayProjects();
-
 class func {
   static resetForms() {
     elements.taskModal.querySelector('form').reset();
@@ -269,6 +264,7 @@ class func {
 
   static saveTaskToProject(project, task) {
     elements.projectsAndTasks[project].push(task);
+    func.saveToLocStorage();
   }
 
   static saveProjectFromForm() {
@@ -282,39 +278,48 @@ class func {
     if (!projectExists) {
       elements.projectsAndTasks[newProject] = [];
       state[newProject] = false;
-    } else {
+      func.saveToLocStorage();
+    } else { 
       alert ('Project already exists, please eneter another project name.')
     }
+
   }
 
   static deleteTaskFromProAndTasks(id) {
     Object.keys(state).forEach(project => {
       if (state[project] == true) {
         elements.projectsAndTasks[project].forEach((task, i) => {
-          if (task.title == id || task.title == id.replace(' ','')) {
+          if (task.id == id) {
             elements.projectsAndTasks[project].splice(i,1);
           }
         })
       }
     })
+    func.saveToLocStorage();
   }
 
-  static deleteProjectFromProAndTasks(id) {
+  static deleteProjectFromProAndTasks(name) {
     Object.keys(elements.projectsAndTasks).forEach(project => {
-      if (project == id) { delete elements.projectsAndTasks[id] };
+      if (project == name) { delete elements.projectsAndTasks[name] };
     })
+    func.saveToLocStorage();
   }
   
   static loadFromLocStorage() {
-
+    let projectsAndTasks;
+    if (localStorage.getItem('projectsAndTAsks')) {
+      projectsAndTasks = JSON.parse(localStorage.getItem('projectsAndTAsks'));
+      return projectsAndTasks;
+    } else {
+      projectsAndTasks = {
+        Inbox: []
+        };
+      return projectsAndTasks;
+    }
   }
 
   static saveToLocStorage() {
-
-  }
-
-  static deleteFromLocStorage() {
-
+    localStorage.setItem('projectsAndTAsks', JSON.stringify(elements.projectsAndTasks));
   }
 
   static generateStateObject() {
@@ -355,11 +360,9 @@ class func {
     elements.editTaskModal.dataset.id = '';
     UI.closeEditTaskModal();
     UI.displayTasks();
+    func.saveToLocStorage();
   }
 }
-
-func.generateStateObject();
-UI.highlightProject();
 
 const eventListeners = (function () {
   elements.addProjectBtn.addEventListener('click', UI.openProjectModal);
@@ -403,20 +406,8 @@ const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCreated = today
   };
 };
 
-
-
-// UI
-
-// update task deadline - on click on date small date picker pops up
-// create modal that pops up on  - create default modal generator and adjust content inside wheteher its new task, new project, open task
-
-// edit task
-
-// local storage
-
-// save to locstor
-// retrieve from locstor
-// delete from locstor
-// delete event listener change from svg to something else it's impossible to fucking click it
-// delete tasks by task ID not name
-
+elements.projectsAndTasks = func.loadFromLocStorage();
+func.generateStateObject();
+UI.displayTasks();
+UI.displayProjects();
+UI.highlightProject();
