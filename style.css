@@ -99,9 +99,8 @@
   cursor: pointer;
 }
 
-.date-added {
+.date-due {
   margin-left: auto;
-  margin-right: 10px;
 }
 
 .task-checkbox,
@@ -167,12 +166,8 @@
   margin-left: 23px;
 }
 
-.tasks-added {
-  margin-left: auto;
-}
-
 .tasks-due {
-  margin-left: 28px;
+  margin-left: auto;
 }
 
 .tasks-priority {

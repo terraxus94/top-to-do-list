@@ -165,7 +165,7 @@ class UI {
           if (task.priority == 2) { priorityColor = 'warning' };
           if (task.priority == 3) { priorityColor = 'success' };
           
-          elements.tasksSection.innerHTML += this.createTaskElement(task.title, task.created, task.due, priorityColor, task.priority, task.id);
+          elements.tasksSection.innerHTML += this.createTaskElement(task.title, task.due, priorityColor, task.priority, task.id);
         })
       }
     })
@@ -196,11 +196,10 @@ class UI {
   }
 
   // creates task HTML element and returns it
-  static createTaskElement(title, created, due, priorityBtn, priority, id) {
+  static createTaskElement(title, due, priorityBtn, priority, id) {
     let currentTask = `<div class="task" data-id='${id}'>
       <input type="checkbox" name="" class="task-checkbox">
       <div class="task-title"> ${title}</div>
-      <div class="date-added"> ${created}</div>
       <div class="date-due"> ${due}</div>
       <div class="priority btn-${priorityBtn}">${priority}</div>
       ${elements.pencilSVG}
@@ -387,11 +386,10 @@ const eventListeners = (function () {
 })();
 
 let i = 0;
-const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCreated = todaysDate, taskCompleted = false) => {
+const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCompleted = false) => {
   let title = taskTitle;
   let priority = taskPriority;
   let due = taskDue;
-  let created = taskCreated;
   let completed = taskCompleted;
   let id = i;
   i++;
@@ -400,7 +398,6 @@ const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCreated = today
     title,
     priority,
     due,
-    created,
     completed,
     id
   };
