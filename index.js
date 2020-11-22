@@ -2,11 +2,10 @@ let todaysDate = new Date().toISOString().slice(0, 10);
 let state = {}; 
 
 const elements = (function () {
+  
   const content = document.querySelector('.content');
-
   const addProjectBtn = content.querySelector('#add-project');
   const addTaskBtn = content.querySelector('#add-task');
-
 
   const taskModal = content.querySelector('.task-modal');
   const taskModalClose = taskModal.querySelector('.close');
@@ -165,12 +164,12 @@ class UI {
           if (task.priority == 2) { priorityColor = 'warning' };
           if (task.priority == 3) { priorityColor = 'success' };
           
-          elements.tasksSection.innerHTML += this.createTaskElement(task.title, task.due, priorityColor, task.priority, task.id);
+          elements.tasksSection.innerHTML += this.createTaskElement(task.title, task.due, priorityColor, task.priority, task.id, task.completed);
         })
       }
     })
   
-    // deleting tasks
+    // deleting tasks - event listener
     const deleteBins = elements.content.querySelector('.tasks-section').querySelectorAll('.bi-trash'); 
     deleteBins.forEach(el => {
       el.addEventListener('click', e => {
@@ -178,14 +177,25 @@ class UI {
       })
     })
 
-    // editing tasks
-    const editPencils = elements.content.querySelectorAll('.bi-pencil'); // not finished, to be completed
+    // editing tasks - event listener
+    const editPencils = elements.content.querySelectorAll('.bi-pencil');
     editPencils.forEach(el => {
       el.addEventListener('click', e => {
         UI.editTaskModal(e.target);
       })
     })
-  
+
+    // checkbox click - event listener
+    const checkboxes = elements.content.querySelectorAll('.task-checkbox'); // new tasks added checked
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('click', e => {
+        UI.taskCompleted(e.target);
+      })
+      if (checkbox.nextElementSibling.classList.contains('completed')) {
+              checkbox.checked = true;
+      };
+    });
+
     let addNewButton = document.createElement('button');
     addNewButton.className = 'add-button';
     addNewButton.id = 'add-task';
@@ -196,16 +206,34 @@ class UI {
   }
 
   // creates task HTML element and returns it
-  static createTaskElement(title, due, priorityBtn, priority, id) {
+  static createTaskElement(title, due, priorityBtn, priority, id, completed) {
+    let taskCompleted = completed ? 'completed' : '';
     let currentTask = `<div class="task" data-id='${id}'>
       <input type="checkbox" name="" class="task-checkbox">
-      <div class="task-title"> ${title}</div>
+      <div class="task-title ${taskCompleted}"> ${title}</div>
       <div class="date-due"> ${due}</div>
       <div class="priority btn-${priorityBtn}">${priority}</div>
       ${elements.pencilSVG}
       ${elements.trashcanSVG}
       </div>`;
     return currentTask;
+  }
+
+  static taskCompleted(checkbox) {
+    const taskCompleted = checkbox.nextElementSibling.classList.toggle('completed');
+    const taskID = checkbox.parentElement.dataset.id;
+
+    Object.keys(state).forEach(project => {
+      if (state[project] == true) {
+        elements.projectsAndTasks[project].forEach(task => {
+          if (task.id == taskID) {
+            task.completed = taskCompleted;
+          }
+        })
+      }
+    });
+    console.log(elements.projectsAndTasks);
+    func.saveToLocStorage();
   }
 
   static deleteTask(el) {
@@ -356,6 +384,7 @@ class func {
         })
       }
     })
+
     elements.editTaskModal.dataset.id = '';
     UI.closeEditTaskModal();
     UI.displayTasks();
@@ -392,7 +421,7 @@ UI.displayProjects();
 UI.highlightProject();
 
 let i = 0;
-function checkTaskIndex() {
+const checkTaskIndex = (function() {
   Object.keys(elements.projectsAndTasks).forEach(project => {
     elements.projectsAndTasks[project].forEach(task => {
       if (task.id > i) {
@@ -400,8 +429,7 @@ function checkTaskIndex() {
       }
     })
   })
-};
-checkTaskIndex();
+})();
 
 const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCompleted = false) => {
   let title = taskTitle;
@@ -419,4 +447,5 @@ const Task = (taskTitle, taskPriority, taskDue = todaysDate, taskCompleted = fal
     id
   };
 };
-// toggle completed
+
+console.log(elements.projectsAndTasks);
